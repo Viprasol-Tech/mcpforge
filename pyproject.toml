@@ -1,0 +1,82 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcpforge"
+version = "0.1.0"
+description = "Generate a runnable MCP server from an OpenAPI spec."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Viprasol Tech Private Limited", email = "support@viprasol.com" }]
+keywords = [
+    "mcp",
+    "model-context-protocol",
+    "openapi",
+    "code-generation",
+    "codegen",
+    "llm-tools",
+    "ai-agents",
+    "api",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Code Generators",
+    "Typing :: Typed",
+]
+dependencies = [
+    "typer>=0.12",
+    "rich>=13.7",
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.5,<0.16",
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "types-PyYAML",
+]
+
+[project.urls]
+Homepage = "https://github.com/Viprasol-Tech/mcpforge"
+Repository = "https://github.com/Viprasol-Tech/mcpforge"
+Issues = "https://github.com/Viprasol-Tech/mcpforge/issues"
+Website = "https://viprasol.com"
+
+[project.scripts]
+mcpforge = "mcpforge.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcpforge"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "C4", "RUF"]
+ignore = ["B008", "B027", "UP042"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
