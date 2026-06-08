@@ -16,6 +16,8 @@ _Built and maintained by **Viprasol Tech**._
 
 </div>
 
+<p align="center"><img src="docs/assets/demo.svg" width="820" alt="mcpforge demo — OpenAPI spec to MCP tools"></p>
+
 ---
 
 `mcpforge` reads an **OpenAPI 3** document and emits a ready-to-run **[Model Context Protocol](https://modelcontextprotocol.io) server**. Every operation (`path` + `method`) becomes one MCP **tool**: the tool name comes from `operationId` (or a clean `get_pets_petId` fallback), and a JSON-Schema `inputSchema` is built by merging path / query / header parameters with the `application/json` request body. Local `$ref`s are resolved for you. The result is a single Python file your LLM agent can call.
@@ -25,6 +27,9 @@ It is a **codegen tool, not a runtime proxy**. The forge itself never imports th
 ## What you get
 
 Run `mcpforge demo` and the bundled petstore spec turns into a ranked tools table plus a preview of the generated server. This is the real output:
+
+<details>
+<summary>Show the text output</summary>
 
 ```text
        mcpforge :: Petstore v1.2.0  (3 tools)
@@ -56,6 +61,8 @@ _TOOLS: list[types.Tool] = [
     ...
 ]
 ```
+
+</details>
 
 The emitted file has a `list_tools` handler returning every tool and a `call_tool` dispatcher that echoes the resolved `(method, path, arguments)` — a safe stub you swap for a real `httpx` call to your backend.
 
