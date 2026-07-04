@@ -5,9 +5,9 @@ document's ``components``, and delegates per-operation work to
 :mod:`mcpforge.tools`. The result is a :class:`ParsedAPI` of :class:`ToolSpec`.
 
 Only the subset needed to build MCP tool schemas is implemented: parameters
-(path/query/header), an ``application/json`` request body, and local
-``#/components/...`` references. External ``$ref`` URLs are intentionally not
-followed.
+(path/query/header/cookie), apiKey security schemes, an ``application/json``
+request body, and local ``#/components/...`` references. External ``$ref`` URLs
+are intentionally not followed.
 """
 
 from __future__ import annotations
@@ -89,6 +89,53 @@ def _request_body_schema(operation: dict[str, Any], root: dict[str, Any]) -> dic
     return schema if isinstance(schema, dict) else None
 
 
+def _api_key_security_parameters(
+    operation: dict[str, Any],
+    root: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Convert applicable apiKey security schemes into required input parameters."""
+
+    security = operation.get("security", root.get("security", []))
+    if not isinstance(security, list) or not security:
+        return []
+    if any(isinstance(requirement, dict) and not requirement for requirement in security):
+        return []
+
+    components = root.get("components", {})
+    if not isinstance(components, dict):
+        return []
+    schemes = components.get("securitySchemes", {})
+    if not isinstance(schemes, dict):
+        return []
+
+    params: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for requirement in security:
+        if not isinstance(requirement, dict):
+            continue
+        for scheme_name in requirement:
+            scheme = schemes.get(scheme_name)
+            if not isinstance(scheme, dict) or scheme.get("type") != "apiKey":
+                continue
+            location = scheme.get("in")
+            name = scheme.get("name")
+            if location not in {"query", "header", "cookie"} or not isinstance(name, str):
+                continue
+            if not name or name in seen:
+                continue
+            params.append(
+                {
+                    "name": name,
+                    "in": location,
+                    "required": True,
+                    "description": f"{scheme_name} API key.",
+                    "schema": {"type": "string"},
+                }
+            )
+            seen.add(name)
+    return params
+
+
 def parse_openapi(document: dict[str, Any]) -> ParsedAPI:
     """Parse an in-memory OpenAPI 3 document into a :class:`ParsedAPI`.
 
@@ -129,7 +176,8 @@ def parse_openapi(document: dict[str, Any]) -> ParsedAPI:
             if not isinstance(operation, dict):
                 continue
             op_params = resolve_refs(operation.get("parameters", []), document)
-            merged = {**operation, "parameters": [*shared_params, *op_params]}
+            security_params = _api_key_security_parameters(operation, document)
+            merged = {**operation, "parameters": [*security_params, *shared_params, *op_params]}
             body_schema = _request_body_schema(operation, document)
             tool = map_operation_to_tool(
                 method,

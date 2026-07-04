@@ -2,7 +2,7 @@
 
 The two public helpers are pure functions over plain dicts:
 
-* :func:`build_input_schema` merges path/query/header parameters and a JSON
+* :func:`build_input_schema` merges path/query/header/cookie parameters and a JSON
   request body into one JSON-Schema ``object``.
 * :func:`map_operation_to_tool` wraps that into a complete :class:`ToolSpec`,
   deriving a safe tool name when no ``operationId`` is present.
@@ -69,7 +69,7 @@ def build_input_schema(
 ) -> dict[str, Any]:
     """Merge parameters and a JSON request body into one JSON-Schema object.
 
-    Path/query/header parameters each become a top-level property (required iff
+    Path/query/header/cookie parameters each become a top-level property (required iff
     the parameter is ``required`` or sits in the path). An ``application/json``
     request body, if present, contributes its own object properties merged at the
     top level, plus a structured ``body`` property carrying the whole payload
