@@ -96,15 +96,15 @@ No spec required for the demo. No `mcp` SDK required to generate. Reading both `
 ```python
 from mcpforge import parse_openapi, render_server, SAMPLE_OPENAPI
 
-parsed = parse_openapi(SAMPLE_OPENAPI)        # -> ParsedAPI
-print(parsed.tool_names())                    # ['listPets', 'createPet', 'getPetById']
+parsed = parse_openapi(SAMPLE_OPENAPI)  # -> ParsedAPI
+print(parsed.tool_names())  # ['listPets', 'createPet', 'getPetById']
 
-tool = parsed.tools[1]                         # createPet
-print(tool.method, tool.path)                  # post /pets
-print(tool.input_schema["required"])           # ['name']
+tool = parsed.tools[1]  # createPet
+print(tool.method, tool.path)  # post /pets
+print(tool.input_schema["required"])  # ['name']
 
-source = render_server(parsed)                 # the server.py as a string
-compile(source, "server.py", "exec")           # always valid Python
+source = render_server(parsed)  # the server.py as a string
+compile(source, "server.py", "exec")  # always valid Python
 ```
 
 Lower-level helpers are exported too:
@@ -112,7 +112,7 @@ Lower-level helpers are exported too:
 ```python
 from mcpforge import build_input_schema, map_operation_to_tool, sanitize_identifier
 
-sanitize_identifier("get pet/by-id!")          # 'get_pet_by_id'
+sanitize_identifier("get pet/by-id!")  # 'get_pet_by_id'
 schema = build_input_schema(
     parameters=[{"name": "petId", "in": "path", "required": True, "schema": {"type": "integer"}}],
     request_body_schema=None,
